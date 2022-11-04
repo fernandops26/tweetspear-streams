@@ -1,0 +1,26 @@
+{
+  "name": "tweetspear-streams",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:fernandops26/tweetspear-streams.git",
+  "author": "Fernando <jf.palacios.sz@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "dev": "ts-node-dev --respawn src/index.ts",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@prisma/client": "4.5.0",
+    "dotenv": "16.0.3",
+    "twitter-api-v2": "1.12.9",
+    "express": "4.18.2",
+    "node-schedule": "2.1.0"
+  },
+  "devDependencies": {
+    "prisma": "4.5.0",
+    "@tsconfig/node16": "1.0.3",
+    "@types/node": "18.11.9",
+    "ts-node-dev": "2.0.0",
+    "typescript": "4.8.4"
+  }
+}
