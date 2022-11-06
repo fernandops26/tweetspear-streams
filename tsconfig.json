@@ -2,8 +2,20 @@
   "extends": "@tsconfig/node16/tsconfig.json",
   "compilerOptions": {
     "outDir": "dist",
-    "strict": true
+    "strict": true,
+    "paths": {
+      "@/utils/*": ["./utils/*"]
+    },
+    "baseUrl": ".",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "incremental": true,
+    "target": "es5",
+    "allowJs": true,
+    "skipLibCheck": true
+    // "module": "commonjs"
   },
-  "include": ["src"],
+  "include": ["**/*.ts"],
   "exclude": ["node_modules"]
 }

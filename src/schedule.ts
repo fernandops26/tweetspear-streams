@@ -1,4 +1,8 @@
 const schedule = require('node-schedule');
+
+import { FROM_RULES, TO_RULES } from '@/utils/constants/twitter';
+import { fromTwitterRule, toTwitterRule } from '@/utils/functions/twitterRules';
+import { getTwitterUsernames } from '@/utils/prisma/users';
 import {
   ETwitterStreamEvent,
   TweetStream,
@@ -35,15 +39,18 @@ const deleteAllRules = async (rules: any) => {
 };
 
 const setRules = async () => {
-  const usernamesRule = ['fernandops26']
-    .map((user) => `from:${user}`)
-    .join(' OR ');
+  const fromRules = fromTwitterRule(await getTwitterUsernames()); //@todo improve to split all users on arrays of rules
+  const toRules = toTwitterRule(await getTwitterUsernames()); //@todo improve to split all users on arrays of rules
 
   await twitterClient.v2.updateStreamRules({
     add: [
       {
-        value: usernamesRule,
-        tag: 'asd',
+        value: fromRules,
+        tag: FROM_RULES,
+      },
+      {
+        value: toRules,
+        tag: TO_RULES,
       },
     ],
   });

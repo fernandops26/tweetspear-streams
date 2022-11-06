@@ -8,21 +8,19 @@ datasource db {
 }
 
 model Account {
-  id                 String  @id
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?
-  access_token       String?
-  oauth_token        String?
-  oauth_token_secret String?
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?
-  session_state      String?
-  User               User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                String  @id
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  expires_at        BigInt?
+  User              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -57,4 +55,13 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Tweet {
+  id             String   @id @unique
+  text           String
+  authorId       String
+  createdAt      DateTime
+  conversationId String
+  data           Json     @db.Json
 }
