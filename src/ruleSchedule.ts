@@ -3,12 +3,7 @@ const schedule = require('node-schedule');
 import { FROM_RULES, TO_RULES } from '@/utils/constants/twitter';
 import { fromTwitterRule, toTwitterRule } from '@/utils/functions/twitterRules';
 import { getTwitterUsernames } from '@/utils/prisma/users';
-import {
-  ETwitterStreamEvent,
-  TweetStream,
-  TwitterApi,
-  ETwitterApiError,
-} from 'twitter-api-v2';
+import { TwitterApi } from 'twitter-api-v2';
 
 const bearer = process.env.APP_BEARER_TOKEN ?? '';
 
@@ -56,7 +51,8 @@ const setRules = async () => {
   });
 };
 
-const job = schedule.scheduleJob('*/1 * * * *', async function () {
+schedule.scheduleJob('*/1 * * * *', async function () {
+  console.log('Updating rules...');
   const currentRules = await getAllRules();
 
   // Delete all rules. Comment the line below if you want to keep your existing rules.
@@ -65,5 +61,5 @@ const job = schedule.scheduleJob('*/1 * * * *', async function () {
   // // Add rules to the stream. Comment the line below if you don't want to add new rules.
   await setRules();
 
-  console.log('The answer to life, the universe, and everything!');
+  console.log('Rules Updated!');
 });

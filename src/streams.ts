@@ -1,20 +1,10 @@
-import {
-  ETwitterStreamEvent,
-  TweetStream,
-  TwitterApi,
-  ETwitterApiError,
-  TweetV2SingleStreamResult,
-} from 'twitter-api-v2';
+import { ETwitterStreamEvent, TweetV2SingleStreamResult } from 'twitter-api-v2';
 
-import { writeFileSync, readFileSync } from 'fs';
 import { FROM_RULES, TO_RULES } from '@/utils/constants/twitter';
 import { Prisma, Tweet } from '@prisma/client';
-import upsertTweet from '@/utils/prisma/tweet';
-// import path from 'path';
+import { upsertTweet } from '@/utils/prisma/tweet';
 
-const bearer = process.env.APP_BEARER_TOKEN ?? '';
-
-const twitterClient = new TwitterApi(bearer);
+import twitterClient from '@/utils/twitter/client';
 
 export default async function () {
   const stream = await twitterClient.v2.searchStream({
@@ -74,10 +64,7 @@ export default async function () {
       'id',
       'in_reply_to_user_id',
       'lang',
-      'non_public_metrics',
-      'organic_metrics',
       'possibly_sensitive',
-      'promoted_metrics',
       'public_metrics',
       'reply_settings',
       'referenced_tweets',
@@ -105,16 +92,7 @@ export default async function () {
     // Emitted when a Twitter payload (a tweet or not, given the endpoint).
     ETwitterStreamEvent.Data,
     (eventData) => {
-      console.log('Twitter has sent something:', eventData);
-      const content = readFileSync('./data.json', {
-        encoding: 'utf8',
-      });
-      console.log('current current: ', { content });
-
-      const file = JSON.parse(content);
-      file.push(eventData);
-
-      writeFileSync('./data.json', JSON.stringify(file));
+      processTwitterData(eventData).then(() => console.log('stored'));
     }
   );
 
@@ -128,9 +106,8 @@ export default async function () {
 }
 
 const processTwitterData = async (tweetData: TweetV2SingleStreamResult) => {
-  const ruleTags = tweetData.matching_rules.map((item) => item.tag);
-
-  const { data } = tweetData;
+  const { data, matching_rules } = tweetData;
+  const ruleTags = matching_rules.map((item) => item.tag);
 
   if (ruleTags.includes(FROM_RULES)) {
     const tweet: Tweet = {
@@ -142,9 +119,19 @@ const processTwitterData = async (tweetData: TweetV2SingleStreamResult) => {
       data: data as unknown as Prisma.JsonObject,
     };
 
-    upsertTweet(tweet);
+    await upsertTweet(tweet);
   }
 
   if (ruleTags.includes(TO_RULES)) {
+    const tweet: Tweet = {
+      id: data.id,
+      authorId: data.author_id ?? '',
+      conversationId: data.conversation_id ?? '',
+      createdAt: new Date(data?.created_at ?? ''),
+      text: data.text,
+      data: data as unknown as Prisma.JsonObject,
+    };
+
+    await upsertTweet(tweet);
   }
 };
